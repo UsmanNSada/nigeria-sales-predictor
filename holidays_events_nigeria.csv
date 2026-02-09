@@ -1,0 +1,87 @@
+date,type,locale,locale_name,description,transferred
+2013-01-01,Holiday,National,Nigeria,New Year's Day,False
+2013-05-01,Holiday,National,Nigeria,Workers' Day,False
+2013-05-27,Holiday,National,Nigeria,Children's Day,False
+2013-05-29,Holiday,National,Nigeria,Democracy Day,False
+2013-10-01,Holiday,National,Nigeria,Independence Day,False
+2013-12-25,Holiday,National,Nigeria,Christmas Day,False
+2013-12-26,Holiday,National,Nigeria,Boxing Day,False
+2013-02-14,Event,National,Nigeria,Valentine's Day,False
+2013-10-31,Event,National,Nigeria,Halloween,False
+2013-01-24,Holiday,National,Nigeria,Eid-el-Maulud,False
+2013-03-29,Holiday,National,Nigeria,Good Friday,False
+2013-04-01,Holiday,National,Nigeria,Easter Monday,False
+2013-08-08,Holiday,National,Nigeria,Eid-el-Fitr,False
+2013-10-15,Holiday,National,Nigeria,Eid-el-Kabir,False
+2013-03-10,Event,National,Nigeria,Mother's Day,False
+2013-11-29,Event,National,Nigeria,Black Friday,False
+2013-12-02,Event,National,Nigeria,Cyber Monday,False
+2014-01-01,Holiday,National,Nigeria,New Year's Day,False
+2014-05-01,Holiday,National,Nigeria,Workers' Day,False
+2014-05-27,Holiday,National,Nigeria,Children's Day,False
+2014-05-29,Holiday,National,Nigeria,Democracy Day,False
+2014-10-01,Holiday,National,Nigeria,Independence Day,False
+2014-12-25,Holiday,National,Nigeria,Christmas Day,False
+2014-12-26,Holiday,National,Nigeria,Boxing Day,False
+2014-02-14,Event,National,Nigeria,Valentine's Day,False
+2014-10-31,Event,National,Nigeria,Halloween,False
+2014-01-13,Holiday,National,Nigeria,Eid-el-Maulud,False
+2014-04-18,Holiday,National,Nigeria,Good Friday,False
+2014-04-21,Holiday,National,Nigeria,Easter Monday,False
+2014-07-28,Holiday,National,Nigeria,Eid-el-Fitr,False
+2014-10-04,Holiday,National,Nigeria,Eid-el-Kabir,False
+2014-03-30,Event,National,Nigeria,Mother's Day,False
+2014-11-28,Event,National,Nigeria,Black Friday,False
+2014-12-01,Event,National,Nigeria,Cyber Monday,False
+2015-01-01,Holiday,National,Nigeria,New Year's Day,False
+2015-05-01,Holiday,National,Nigeria,Workers' Day,False
+2015-05-27,Holiday,National,Nigeria,Children's Day,False
+2015-05-29,Holiday,National,Nigeria,Democracy Day,False
+2015-10-01,Holiday,National,Nigeria,Independence Day,False
+2015-12-25,Holiday,National,Nigeria,Christmas Day,False
+2015-12-26,Holiday,National,Nigeria,Boxing Day,False
+2015-02-14,Event,National,Nigeria,Valentine's Day,False
+2015-10-31,Event,National,Nigeria,Halloween,False
+2015-01-02,Holiday,National,Nigeria,Eid-el-Maulud,False
+2015-04-03,Holiday,National,Nigeria,Good Friday,False
+2015-04-06,Holiday,National,Nigeria,Easter Monday,False
+2015-07-17,Holiday,National,Nigeria,Eid-el-Fitr,False
+2015-09-24,Holiday,National,Nigeria,Eid-el-Kabir,False
+2015-12-24,Holiday,National,Nigeria,Eid-el-Maulud,False
+2015-03-15,Event,National,Nigeria,Mother's Day,False
+2015-11-27,Event,National,Nigeria,Black Friday,False
+2015-11-30,Event,National,Nigeria,Cyber Monday,False
+2016-01-01,Holiday,National,Nigeria,New Year's Day,False
+2016-05-01,Holiday,National,Nigeria,Workers' Day,False
+2016-05-27,Holiday,National,Nigeria,Children's Day,False
+2016-05-29,Holiday,National,Nigeria,Democracy Day,False
+2016-10-01,Holiday,National,Nigeria,Independence Day,False
+2016-12-25,Holiday,National,Nigeria,Christmas Day,False
+2016-12-26,Holiday,National,Nigeria,Boxing Day,False
+2016-02-14,Event,National,Nigeria,Valentine's Day,False
+2016-10-31,Event,National,Nigeria,Halloween,False
+2016-03-25,Holiday,National,Nigeria,Good Friday,False
+2016-03-28,Holiday,National,Nigeria,Easter Monday,False
+2016-07-06,Holiday,National,Nigeria,Eid-el-Fitr,False
+2016-09-12,Holiday,National,Nigeria,Eid-el-Kabir,False
+2016-12-12,Holiday,National,Nigeria,Eid-el-Maulud,False
+2016-03-06,Event,National,Nigeria,Mother's Day,False
+2016-11-25,Event,National,Nigeria,Black Friday,False
+2016-11-28,Event,National,Nigeria,Cyber Monday,False
+2017-01-01,Holiday,National,Nigeria,New Year's Day,False
+2017-05-01,Holiday,National,Nigeria,Workers' Day,False
+2017-05-27,Holiday,National,Nigeria,Children's Day,False
+2017-05-29,Holiday,National,Nigeria,Democracy Day,False
+2017-10-01,Holiday,National,Nigeria,Independence Day,False
+2017-12-25,Holiday,National,Nigeria,Christmas Day,False
+2017-12-26,Holiday,National,Nigeria,Boxing Day,False
+2017-02-14,Event,National,Nigeria,Valentine's Day,False
+2017-10-31,Event,National,Nigeria,Halloween,False
+2017-04-14,Holiday,National,Nigeria,Good Friday,False
+2017-04-17,Holiday,National,Nigeria,Easter Monday,False
+2017-06-25,Holiday,National,Nigeria,Eid-el-Fitr,False
+2017-09-01,Holiday,National,Nigeria,Eid-el-Kabir,False
+2017-12-01,Holiday,National,Nigeria,Eid-el-Maulud,False
+2017-03-26,Event,National,Nigeria,Mother's Day,False
+2017-11-24,Event,National,Nigeria,Black Friday,False
+2017-11-27,Event,National,Nigeria,Cyber Monday,False

@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # SERVICE 1: The App (Backend + Frontend)
+  web:
+    build: .
+    ports:
+      - "8000:8000"  # Map container port 8000 to your Mac's port 8000
+    environment:
+      # This tells FastAPI to look for the container named "db" instead of localhost
+      - DATABASE_URL=postgresql://sales_user:sales_password@db/sales_db
+    depends_on:
+      - db
+    volumes:
+      - .:/app  # Live Sync: Changes on your Mac update inside Docker instantly
+    restart: on-failure  # If DB isn't ready instantly, retry automatically
+
+  # SERVICE 2: The Database
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=sales_user
+      - POSTGRES_PASSWORD=sales_password
+      - POSTGRES_DB=sales_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persist data so it survives restarts
+
+volumes:
+  postgres_data:
