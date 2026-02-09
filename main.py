@@ -1,22 +1,29 @@
 import os
 import gc
-from fastapi.staticfiles import StaticFiles  # <--- Make sure this is imported
+import joblib
+import pandas as pd
+import numpy as np
+from datetime import datetime
+
+# FastAPI Imports
 from fastapi import FastAPI, Request, Form, Depends
-from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
+# Database Imports
 from sqlalchemy import create_engine, Column, Integer, String, Float, Date, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
-from datetime import datetime
-import pandas as pd
-import numpy as np
-import joblib
 
 # ===========================
 # 1. DATABASE CONFIGURATION
 # ===========================
-# Connects to 'db' container in Docker, or 'localhost' if running locally
+# Connects to Render's Neon DB or Localhost fallback
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://sales_user:sales_password@localhost/sales_db")
+
+# FIX: Render/Neon provides 'postgres://', but SQLAlchemy needs 'postgresql://'
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -46,54 +53,67 @@ def get_db():
         db.close()
 
 # ===========================
-# 2. LOAD AI MODEL & CONTEXT
+# 2. INTELLIGENT LOADING (The Fix)
 # ===========================
-print("⏳ Loading AI Model & Context Data...")
+
+# A. LOAD ENCODERS & CSV IMMEDIATELY 
+# These are small files. We need them for the Homepage dropdowns.
 try:
-    # OPTIMIZED LOADING for Free Tier (Low Memory)
-    # mmap_mode='r' keeps the file on disk and maps it to memory
-    # instead of copying it. This prevents the 512MB RAM crash.
-    model = joblib.load('nigeria_sales_model.pkl', mmap_mode='r')
+    print("⏳ Loading Encoders & Store Data...")
     encoders = joblib.load('encoders.pkl')
     
-    # Force clean up immediately
-    gc.collect()
-
-    # Load the State-to-Store Mapping CSV
     if os.path.exists('stores_nigeria.csv'):
         stores_df = pd.read_csv('stores_nigeria.csv')
         all_cities = sorted(stores_df['city'].unique())
     else:
-        # Fallback
-        stores_df = pd.DataFrame({'store_nbr': [1], 'city': ['Lagos'], 'cluster': [1], 'type': ['D']})
-        all_cities = ['Lagos']
-        
-    print("✅ AI System Ready.")
+        all_cities = ['Lagos'] # Fallback
+        stores_df = pd.DataFrame()
+
 except Exception as e:
-    print(f"❌ Error loading data: {e}")
-    stores_df = pd.DataFrame()
+    print(f"❌ Critical Error loading context files: {e}")
+    encoders = None
     all_cities = []
-print("⏳ Loading AI Model & Context Data...")
 
+# B. LAZY LOAD THE MODEL (The Memory Saver)
+# We keep 'model' as None so the app starts fast and uses low RAM.
+model = None
 
+def get_lazy_model():
+    """
+    Only load the heavy 180MB model when a user actually clicks 'Predict'.
+    """
+    global model
+    if model is None:
+        print("⚡ Waking up the AI Brain (Lazy Load)...")
+        gc.collect() # Clean RAM before loading
+        # mmap_mode='r' reads from disk without copying to RAM
+        model = joblib.load('nigeria_sales_model.pkl', mmap_mode='r')
+        print("✅ AI Model Loaded Successfully.")
+    return model
+
+# ===========================
+# 3. APP SETUP
+# ===========================
 app = FastAPI(title="Nigeria Sales Predictor")
 
-# NEW: Tell FastAPI to serve files inside the 'static' folder
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 DEFAULT_OIL_PRICE = 50.0 
 
 # ===========================
-# 3. WEB ROUTES
+# 4. WEB ROUTES
 # ===========================
 
 @app.get("/")
 def read_form(request: Request):
+    # Encoders are already loaded, so this works instantly!
+    family_list = sorted(encoders['family'].classes_) if encoders else []
+    
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "cities": all_cities, # Shows all 36 States
-        "families": sorted(encoders['family'].classes_),
+        "cities": all_cities,
+        "families": family_list,
         "selected_city": "Lagos",
         "selected_family": "GROCERY I",
         "selected_date": "2017-08-16",
@@ -110,24 +130,21 @@ def predict_sales(
     db: Session = Depends(get_db)
 ):
     try:
-        # --- A. LOGIC: Find the Best Store ID for this State ---
-        # Map user's State choice to a specific Store ID (Economic Tier)
+        # --- 1. WAKE UP THE MODEL ---
+        # This is where we load the heavy file!
+        clf = get_lazy_model()
+
+        # --- A. LOGIC: Find Store ID ---
         city_stores = stores_df[stores_df['city'] == city]
-        
         if not city_stores.empty:
             selected_store = city_stores.iloc[0]
             store_nbr = selected_store['store_nbr']
             cluster = selected_store['cluster']
             store_type = selected_store['type']
         else:
-            # Fallback defaults
-            store_nbr = 1
-            cluster = 1
-            store_type = 'D'
+            store_nbr = 1; cluster = 1; store_type = 'D'
 
         # --- B. SAFE ENCODING ---
-        # If the AI doesn't know the name "Zamfara", use a known name (e.g. Lagos)
-        # to prevent crashing. The Store ID drives the prediction, so this is safe.
         if city in encoders['city'].classes_:
             safe_city_code = encoders['city'].transform([city])[0]
         else:
@@ -158,18 +175,17 @@ def predict_sales(
             'state': [safe_city_code] 
         })
 
-        # --- D. PREDICTION & SCALING ---
-        log_pred = model.predict(input_data)[0]
+        # --- D. PREDICTION ---
+        # Use 'clf' (the locally loaded model)
+        log_pred = clf.predict(input_data)[0]
         units_pred = np.expm1(log_pred)
         units_pred = max(0, float(units_pred))
 
-        # NEW: Scale single-item prediction to "Department Total"
-        # We assume a category (e.g. "Dairy") has ~50 different products on shelf.
+        # Scale to Department Level
         CATEGORY_MULTIPLIER = 50 
         adjusted_units = units_pred * CATEGORY_MULTIPLIER
 
         # --- E. REVENUE CALCULATION ---
-        # Estimated Average Price per Item (in 2017 Naira)
         price_map = {
             'AUTOMOTIVE': 4500, 'BABY CARE': 2500, 'BEAUTY': 3000,
             'BEVERAGES': 1200, 'BOOKS': 2500, 'BREAD/BAKERY': 500,
@@ -198,14 +214,13 @@ def predict_sales(
 
     except Exception as e:
         formatted_result = f"Error: {str(e)}"
-        detail_text = ""
+        detail_text = "Please check logs."
         print(f"❌ Prediction Error: {e}")
 
-    # Return template with "Sticky" values (user inputs preserved)
     return templates.TemplateResponse("index.html", {
         "request": request,
         "cities": all_cities,
-        "families": sorted(encoders['family'].classes_),
+        "families": sorted(encoders['family'].classes_) if encoders else [],
         "prediction": formatted_result,
         "detail": detail_text,
         "selected_city": city,
