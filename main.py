@@ -1,4 +1,5 @@
 import os
+import gc
 from fastapi.staticfiles import StaticFiles  # <--- Make sure this is imported
 from fastapi import FastAPI, Request, Form, Depends
 from fastapi.templating import Jinja2Templates
@@ -49,16 +50,21 @@ def get_db():
 # ===========================
 print("⏳ Loading AI Model & Context Data...")
 try:
-    model = joblib.load('nigeria_sales_model.pkl')
+    # OPTIMIZED LOADING for Free Tier (Low Memory)
+    # mmap_mode='r' keeps the file on disk and maps it to memory
+    # instead of copying it. This prevents the 512MB RAM crash.
+    model = joblib.load('nigeria_sales_model.pkl', mmap_mode='r')
     encoders = joblib.load('encoders.pkl')
     
+    # Force clean up immediately
+    gc.collect()
+
     # Load the State-to-Store Mapping CSV
     if os.path.exists('stores_nigeria.csv'):
         stores_df = pd.read_csv('stores_nigeria.csv')
-        # This gives us the full list of 36 States + FCT for the dropdown
         all_cities = sorted(stores_df['city'].unique())
     else:
-        # Fallback (Safety Mode)
+        # Fallback
         stores_df = pd.DataFrame({'store_nbr': [1], 'city': ['Lagos'], 'cluster': [1], 'type': ['D']})
         all_cities = ['Lagos']
         
@@ -67,6 +73,8 @@ except Exception as e:
     print(f"❌ Error loading data: {e}")
     stores_df = pd.DataFrame()
     all_cities = []
+print("⏳ Loading AI Model & Context Data...")
+
 
 app = FastAPI(title="Nigeria Sales Predictor")
 
